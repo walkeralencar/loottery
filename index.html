@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>Lootery v0.1.0 | walkeralencar</title>
+
+    <!-- Required Stylesheets -->
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css" />
+</head>
+
+<body>
+    <div id="app">
+        <b-container>
+            <b-jumbotron bg-variant="primary" text-variant="white" header="Loottery" lead="Sorteio de loots - v0.1.0 | by WalkerAlencar">
+                Essa ferramenta foi feita para simplificar e agilizar a divisão dos itens de forma justa entre os participantes.
+                <br>
+                <br>
+                <strong>Importante</strong>
+                <br> Organize os itens em um inventario em quantidade que seja divisível pelo numero de players envolvidos.
+            </b-jumbotron>
+            <b-card header="Itens">
+                <b-input-group prepend="Qtd Itens">
+                    <b-form-input v-model.number="qtdItems" type="number"></b-form-input>
+                    <b-input-group-append>
+                        <b-button variant="primary" v-on:click="sortear">Sortear</b-button>
+                    </b-input-group-append>
+                </b-input-group>
+            </b-card>
+            <hr/>
+            <b-card header-bg-variant="primary" header-text-variant="white" header="Players">
+                <b-input-group prepend="Player">
+                    <b-form-input v-model.trim="name" @keyup.enter.native="addPlayer"></b-form-input>
+                    <b-input-group-append>
+                        <b-button variant="primary" v-on:click="addPlayer">Add</b-button>
+                    </b-input-group-append>
+                </b-input-group>
+                <b-list-group>
+                    <b-list-group-item v-for="player in players">
+                        {{ player.name }}
+                        <b-badge variant="primary" v-for="item in player.items">{{ item }}</b-badge>
+                    </b-list-group-item>
+                </b-list-group>
+            </b-card>
+        </b-container>
+    </div>
+    <!-- Required scripts -->
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+
+    <!-- Start running your app -->
+    <script>
+        var Player = function() {
+            this.name = '';
+            this.items = [];
+        };
+        var suffleArray = function(array) {
+            var counter = array.length,
+                temp, index;
+            while (counter > 0) {
+                index = Math.floor(Math.random() * counter);
+                counter--;
+                temp = array[counter];
+                array[counter] = array[index];
+                array[index] = temp;
+            }
+            return array;
+        };
+        window.app = new Vue({
+            el: '#app',
+            data: {
+                name: '',
+                players: [],
+                qtdItems: 0
+            },
+            computed: {
+                showAlert() {
+                    return this.name.length > 4 ? true : false
+                }
+            },
+            methods: {
+                addPlayer: function() {
+                    var player = new Player();
+                    player.name = this.name;
+                    this.players.push(player);
+                    this.name = '';
+                },
+                sortear: function() {
+                    if (this.qtdItems == 0) {
+                        alert('Defina a qtd de itens');
+                        return;
+                    }
+                    var items = Array.from(Array(this.qtdItems + 1).keys());
+                    items.shift();
+                    items = suffleArray(items);
+                    for (var i = 0; i < this.players.length; i++) {
+                        this.players[i].items = [];
+                    }
+
+                    nextPlayer = 0;
+                    while (items.length > 0) {
+                        this.players[nextPlayer++].items.push(items.splice(0, 1)[0])
+                        if (nextPlayer == this.players.length) {
+                            nextPlayer = 0;
+                        }
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
